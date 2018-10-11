@@ -1,0 +1,78 @@
+\ProvidesFile{md.cbx} % version 0.1
+
+\RequireCitationStyle{numeric-comp}
+% ========================================================= %
+% This citation style is intended to be used for conversion
+% to markdown and is part of the bib2md package developed by
+% Fanda Blahoudek.
+% https://github.com/xblahoud/bib2md
+% Version 0.1
+% ========================================================= %
+
+% Use semicolon to separate multiple citations
+\renewcommand{\multicitedelim}{\addsemicolon\space}
+
+% ========================================================= %
+% \DeclareCiteCommand below creates a short citation with a
+% clickable title if possible (file, doi, url). It uses no
+% citation index.
+% **Author** (Year): *Title*
+% ========================================================= %
+
+\DeclareCiteCommand{\mdcite}%
+  {\usebibmacro{cite:init}%
+   \usebibmacro{prenote}}%
+  {\usebibmacro{citeindex}%
+   \setunit*{\addspace}%
+   \usebibmacro{nameyeartitle}\midsentence%
+   }%
+  {\multicitedelim}%
+  {\usebibmacro{cite:dump}
+   \usebibmacro{postnote}
+   \addperiod}%
+
+% Prints Name (Year): Title
+\newbibmacro*{nameyeartitle}{%
+  \mkbibbold{\usebibmacro{shortauthor}}%
+  \addspace%
+  \mkbibparens{\printfield{year}}\addcolon\addspace%
+  \mkbibemph{\usebibmacro{clickabletitle}}%
+}%
+
+% We use short names (surnames only) for sake of succintness
+\newbibmacro{shortauthor}{%
+  \printnames[author:short]{author}%
+}%
+\DeclareNameFormat{author:short}{\usebibmacro{name:family}
+  {\namepartfamily}{\namepartgiven}%
+  {\namepartprefix}{\namepartsuffix}%
+  \usebibmacro{name:andothers}
+}%
+
+% Prints title that linked to file/doi/url if available
+\newbibmacro*{clickabletitle}{%
+  \iffieldundef{file}{%
+    \iffieldundef{doi}{%
+      \iffieldundef{url}{%
+        \printfield[ctitle]{title}%
+      }{%
+        \printfield[urllink]{title}%
+      }%
+    }{%
+      \printfield[doilink]{title}%
+    }%
+  }{%
+    \printfield[filelink]{title}%
+  }%
+}%
+
+%%% Formats to print the various links %%%
+\DeclareFieldFormat{filelink}{%
+  \href{\thefield{file}}{#1}%
+}%
+\DeclareFieldFormat{doilink}{%
+  \href{http://dx.doi.org/\thefield{doi}}{#1}%
+}%
+\DeclareFieldFormat{urllink}{%
+  \href{\thefield{url}}{#1}%
+}%

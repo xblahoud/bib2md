@@ -1,0 +1,182 @@
+\ProvidesFile{md.bbx} % version 0.1
+
+\RequireBibliographyStyle{numeric-comp}
+% ======================================================== %
+% This bibliography style is intended to be used for
+% conversion to markdown and is part of the bib2md package
+% developed by Fanda Blahoudek.
+% https://github.com/xblahoud/bib2md
+% Version 0.1
+% ======================================================== %
+% The style contains drivers for the following entry types
+% (the rest is inherited from numeric-comp):
+% * article
+% * book
+% * inproceedings
+% * thesis
+%
+% The style relies on macros defined in the corresponding
+% citation style md.cbx
+%
+% The style uses the following pattern for entries:
+% *Author* (Year).
+% **Title**. Rest of the entry
+%
+% The title is link to file/doi/url if available.
+% ======================================================== %
+
+\DeclareBibliographyDriver{article}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{nameyear}%
+  \usebibmacro{title}%
+  \addperiod%
+  \newunit\newblock%
+  \usebibmacro{journal+issuetitle}%
+  \newunit\newblock%
+  \iftoggle{bbx:isbn}%
+    {\printfield{issn}}%
+    {}%
+  \newunit\newblock%
+  \addperiod%
+  \usebibmacro{doi+eprint+url}%
+  \usebibmacro{pageref}%
+  \usebibmacro{finentry}}
+  
+\DeclareBibliographyDriver{book}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{nameyear}%
+  \usebibmacro{maintitle+title}%
+  \addperiod%
+  \newunit%
+  \printlist{language}%
+  \newunit\newblock%
+  \usebibmacro{byauthor}%
+  \newunit\newblock%
+  \usebibmacro{byeditor+others}%
+  \newunit\newblock%
+  \printfield{edition}%
+  \newunit%
+  \iffieldundef{maintitle}%
+    {\printfield{volume}%
+     \printfield{part}}%
+    {}%
+  \newunit%
+  \printfield{volumes}%
+  \newunit\newblock%
+  \usebibmacro{series+number}%
+  \newunit\newblock%
+  \printfield{note}%
+  \newunit\newblock%
+  \printlist{publisher}%
+  \addperiod%
+  \newunit\newblock%
+  \usebibmacro{chapter+pages}%
+  \newunit%
+  \printfield{pagetotal}%
+  \newunit\newblock%
+  \iftoggle{bbx:isbn}%
+    {\printfield{isbn}}%
+    {}%
+  \newunit\newblock%
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock%
+  \usebibmacro{addendum+pubstate}%
+  \newunit\newblock%
+  \usebibmacro{pageref}%
+  \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{inproceedings}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{nameyear}%
+  \usebibmacro{title}%
+  \newunit\newblock%
+  \usebibmacro{in+proctitle}%
+  \newunit\newblock%
+  \usebibmacro{series+volume+part}%
+  \newunit\newblock%
+  \printfield{note}%
+  \newunit%
+  \printlist{publisher}\addcomma
+  \newunit\newblock%
+  \usebibmacro{chapter+pages}%
+  \newunit\newblock%
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock%
+  \usebibmacro{pageref}%
+  \usebibmacro{finentry}}
+
+\DeclareBibliographyDriver{thesis}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{nameyear}%
+  \usebibmacro{title}%
+  \addperiod%
+  \newunit%
+  \printlist{language}%
+  \newunit\newblock%
+  \usebibmacro{byauthor}%
+  \newunit\newblock%
+  \printfield{note}%
+  \newunit\newblock
+  \printfield{type}%
+  \addperiod%
+  \newunit%
+  \usebibmacro{institution+location+date}%
+  \addperiod%
+  \newunit%
+  \usebibmacro{pageref}%
+  \usebibmacro{finentry}}
+
+% ============== Redefined macros ==================%
+
+% Prints the first line of the entry
+\newbibmacro*{nameyear}{%
+	\mkbibemph{\usebibmacro{author}}%
+	\addspace%
+	\mkbibparens{\printfield{year}}%
+	\addperiod\newline%
+}%
+
+% Prints the title with links. Relies on clicable title
+% from md.cbx
+\renewbibmacro*{title}{%
+	\mkbibbold{\usebibmacro{clickabletitle}}%
+}%
+
+% Some other adjustments to my personal taste
+\renewbibmacro*{journal+issuetitle}{%
+  \usebibmacro{journal}%
+  \setunit*{\addspace}%
+  \printfield{volume}%
+  \setunit{\addcomma\space}%
+  \printfield{eid}%
+  \setunit{\addspace}%
+  \usebibmacro{note+pages}%
+  \setunit{\addcomma\space}%
+  \newunit}
+
+\newbibmacro*{series+volume+part}{%
+  \printfield{series}%
+  \iffieldundef{volume}%
+    {}%
+    {\addspace\mkbibparens{\printfield{volume}}}%
+    \setunit*{\addcomma\addspace}%
+    \printfield{part}%
+  \newunit}%
+
+\newbibmacro*{in+proctitle}{%
+  \printtext{\bibstring{in}\addspace%
+  \usebibmacro{maintitle+booktitle}}%
+  \addperiod%
+}
+
+\DeclareFieldFormat{part}{part #1}
+
+\DeclareFieldFormat{doi}{%
+  DOI:\addspace\printtext[doilink]{#1}
+}%
+
+\endinput
