@@ -1,0 +1,24 @@
+\documentclass{article}
+
+\PassOptionsToPackage{dvipsnames}{xcolor}
+\usepackage{xcolor}
+
+\definecolor{webgreen}{rgb}{0,.5,0}
+\definecolor{webbrown}{rgb}{.6,0,0}
+
+\usepackage[
+  colorlinks=true,
+  urlcolor=webbrown, linkcolor=webgreen, citecolor=webgreen,
+]{hyperref}
+\usepackage[
+  backend=biber,
+  style=md,
+]{biblatex}
+
+\addbibresource{mypub.bib}
+
+\begin{document}
+We can write some text here and then cite some our work like this for example \mdcite{blahoudek.17.lpar}, and we may try cite multiple papers in one command \mdcite{babiak.13.atva,babiak.15.cav}.
+
+%\printbibliography
+\end{document}
