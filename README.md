@@ -46,6 +46,24 @@ formatting.
     # convert the html into markdown using pandoc
     pandoc -t markdown foo.html | sed 's/\[\]{#page.1}\[\]{#X0-}//' > foo.md
 
+Customization
+-------------
+
+The citation command `\mdcite` can be easily extended by redefining the
+macro `fincite` that allows you to add anything after the citation. The
+bibliography entries can be extended in the standard BibLaTeX way -- by
+redefining the `finentry` macro.
+
+### The `md-notes-short-conf` style
+
+The style uses the hooks above to add link to file with the user's
+notes. It currectly expects the filename to be stored in the
+`annotation` field. This is subject to change.
+
+The next feature of this style that it prefers the `eventtitle` to
+`booktitle` for the inproceedings entry types. This allows us to specify
+the conferences abbreviations in the bibliography.
+
 Advanced use
 ------------
 
@@ -101,8 +119,7 @@ Format](http://dx.doi.org/10.1007/978-3-319-21690-4_31)*.
     Omega-Automata](https://easychair.org/publications/paper/340360)**.
     In *Proceedings of the 21st International Conference on Logic for
     Programming, Artiﬁcial Intelligence and Reasoning (LPAR-21)*. EPiC
-    Series in Computing (vol. 46). EasyChair, pp. 356–367.
-    [url]{.small-caps}:
+    Series in Computing (vol. 46). EasyChair, pp. 356–367. URL:
     <https://easychair.org/publications/paper/340360>.
 -   *František Blahoudek, Alexandre Duret-Lutz, Mojmír Křetínský, and
     Jan Strejček* (2014).\

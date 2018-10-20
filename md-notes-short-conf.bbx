@@ -1,0 +1,50 @@
+\ProvidesFile{md-notes-short-conf.bbx} % version 0.1
+
+\RequireBibliographyStyle{md}
+% ======================================================== %
+% This bibliography style is intended to be used for
+% conversion to markdown and is part of the bib2md package
+% developed by Fanda Blahoudek.
+% https://github.com/xblahoud/bib2md
+% Version 0.1
+% ======================================================== %
+% This style modifies md.bbx in two ways.
+%  1. It uses shorttitle of proceedings rather then the
+%     main title (the intended use is to store abbreviations
+%     of conference names)
+%  2. Appends a link to a file with notes about the paper.
+%     The style assumes the file name is stored in the field
+%     annotation
+%
+% The style relies on macros defined in the corresponding
+% citation style md.cbx
+%
+% The style uses the following pattern for entries:
+% *Author* (Year).
+% **Title**. Rest of the entry
+%
+% The title is also a link to file/doi/url if available.
+% ======================================================== %
+
+% Use eventtitle instead of booktitle
+\renewbibmacro*{in+proctitle}{%
+  \printtext{\bibstring{in}\addspace}%
+  \iffieldundef{eventtitle}% If eventtitle not available, use
+  {\usebibmacro{maintitle+booktitle}}% the full booktitle
+  {\printfield{eventtitle}}%
+}%
+
+% Add link to file with notes
+\renewbibmacro*{finentry}{%
+  \newunit\newblock\addperiod
+  \usebibmacro{notesfile}\finentry%
+}
+
+\newbibmacro*{notesfile}{%
+  \iffieldundef{annotation}{}{%
+  \newline%
+  \printtext{See \href{\thefield{annotation}}{\thefield{annotation}} for our notes.}
+  }%
+}
+
+\endinput

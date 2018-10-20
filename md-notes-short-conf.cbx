@@ -1,0 +1,24 @@
+\ProvidesFile{md-notes-short-conf.cbx} % version 0.1
+%
+\RequireCitationStyle{md}%
+% ========================================================= %
+% This citation style is intended to be used for conversion
+% to markdown and is part of the bib2md package developed by
+% Fanda Blahoudek.
+% https://github.com/xblahoud/bib2md
+% Version 0.1
+% ========================================================= %
+
+% Use the fincite macro to add links to files
+% with notes stored in the field annotation
+\renewbibmacro*{fincite}{%
+  \iffieldundef{annotation}%
+  {}%
+  {\addspace\printfield[notesfileshortlink]{annotation}}%
+}%
+%
+\DeclareFieldFormat{notesfileshortlink}{%
+  \mkbibparens{\href{#1}{notes}}%
+}%
+%
+\endinput

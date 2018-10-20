@@ -28,7 +28,12 @@ pandoc -t markdown foo.html | sed 's/\[\]{#page.1}\[\]{#X0-}//' > foo.md
 ```
 
 ## Customization
-The citation command `\mdcite` can be easily extended by redefining the macro `fincite` that allows you to add anything after the citation.
+The citation command `\mdcite` can be easily extended by redefining the macro `fincite` that allows you to add anything after the citation. The bibliography entries can be extended in the standard BibLaTeX way -- by redefining the `finentry` macro.
+
+### The `md-notes-short-conf` style
+The style uses the hooks above to add link to file with the user's notes. It currectly expects the filename to be stored in the `annotation` field. This is subject to change.
+
+The next feature of this style that it prefers the `eventtitle` to `booktitle` for the inproceedings entry types. This allows us to specify the conferences abbreviations in the bibliography.
 
 ## Advanced use
 The power of the package can be used to combine the simplicity of Markdown and power of BibLaTeX. You can write most of your text in Markdown and the bibliography-intense parts in LaTeX. You then convert the `.tex` files into `.md` and finally merge all the `.md` files together by `pandoc`. You can take this README as an example. It was created by the [Makefile](Makefile) and that joins `README.header.md` and files from the [example_use](example_use) directory.
