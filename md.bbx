@@ -22,7 +22,7 @@
 % *Author* (Year).
 % **Title**. Rest of the entry
 %
-% The title is link to file/doi/url if available.
+% The title is also a link to file/doi/url if available.
 % ======================================================== %
 
 \DeclareBibliographyDriver{article}{%
@@ -94,7 +94,7 @@
   \usebibmacro{title}%
   \newunit\newblock%
   \usebibmacro{in+proctitle}%
-  \newunit\newblock%
+  \addcomma\newblock%
   \usebibmacro{series+volume+part}%
   \newunit\newblock%
   \printfield{note}%
@@ -177,6 +177,10 @@
 
 \DeclareFieldFormat{doi}{%
   DOI:\addspace\printtext[doilink]{#1}
+}%
+
+\DeclareFieldFormat{url}{%
+    URL:\addspace\printtext[urllink]{#1}
 }%
 
 \endinput

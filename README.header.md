@@ -27,6 +27,9 @@ htxelatex foo.tex md.cfg " -cunihtf -utf8"
 pandoc -t markdown foo.html | sed 's/\[\]{#page.1}\[\]{#X0-}//' > foo.md
 ```
 
+## Customization
+The citation command `\mdcite` can be easily extended by redefining the macro `fincite` that allows you to add anything after the citation.
+
 ## Advanced use
 The power of the package can be used to combine the simplicity of Markdown and power of BibLaTeX. You can write most of your text in Markdown and the bibliography-intense parts in LaTeX. You then convert the `.tex` files into `.md` and finally merge all the `.md` files together by `pandoc`. You can take this README as an example. It was created by the [Makefile](Makefile) and that joins `README.header.md` and files from the [example_use](example_use) directory.
 

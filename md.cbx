@@ -1,6 +1,6 @@
 \ProvidesFile{md.cbx} % version 0.1
-
-\RequireCitationStyle{numeric-comp}
+%
+\RequireCitationStyle{numeric-comp}%
 % ========================================================= %
 % This citation style is intended to be used for conversion
 % to markdown and is part of the bib2md package developed by
@@ -24,7 +24,8 @@
    \usebibmacro{prenote}}%
   {\usebibmacro{citeindex}%
    \setunit*{\addspace}%
-   \usebibmacro{nameyeartitle}\midsentence%
+   \usebibmacro{nameyeartitle}%
+   \usebibmacro{fincite}%
    }%
   {\multicitedelim}%
   {\usebibmacro{cite:dump}
@@ -76,3 +77,9 @@
 \DeclareFieldFormat{urllink}{%
   \href{\thefield{url}}{#1}%
 }%
+
+%%% fincite macro is a blank by default, you can extend the
+%%% citation with it easily
+\newbibmacro*{fincite}{}%
+
+\endinput
