@@ -1,0 +1,56 @@
+\documentclass{article}
+
+\usepackage{hyperref}
+\usepackage[%
+  $if(biblio-style)$style=$biblio-style$,$endif$%
+  $for(biblatexoptions)$$biblatexoptions$$sep$,$endfor$]%
+{biblatex}
+
+$for(bibliography)$
+\addbibresource{$bibliography$}
+$endfor$
+
+\usepackage{amssymb,amsmath}
+
+$if(title)$
+\title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
+$endif$
+$if(subtitle)$
+\providecommand{\subtitle}[1]{}
+\subtitle{$subtitle$}
+$endif$
+$if(author)$
+\author{$for(author)$$author$$sep$ \and $endfor$}
+$endif$
+$if(institute)$
+\providecommand{\institute}[1]{}
+\institute{$for(institute)$$institute$$sep$ \and $endfor$}
+$endif$
+\date{$date$}
+
+\begin{document}
+$if(title)$
+\maketitle
+$endif$
+$if(abstract)$
+\begin{abstract}
+$abstract$
+\end{abstract}
+$endif$
+
+$for(include-before)$
+$include-before$
+
+$endfor$
+
+$body$
+
+$if(print-biblio)$
+\printbibliography$if(biblio-title)$[title=$biblio-title$]$endif$
+$endif$
+
+$for(include-after)$
+$include-after$
+
+$endfor$
+\end{document}
