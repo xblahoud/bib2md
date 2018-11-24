@@ -1,0 +1,6 @@
+# Jupyter checkpints
+.ipynb_checkpoints
+
+# Intermediate files in example use
+example_use/cite.md
+example_use/full_ref.md
