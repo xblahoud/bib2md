@@ -10,6 +10,7 @@ def md2tex(md_file, bibliography,
            verbose=False):
     pandoc_options = [
       '--to=latex',
+      '--from=markdown',
       '--standalone',
       '--template={}'.format(template),
       '--biblatex',
