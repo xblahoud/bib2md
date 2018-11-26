@@ -2,6 +2,21 @@
 
 import subprocess
 import argparse
+import tempfile as tf
+import re
+import shutil
+import os
+
+def is_local(path):
+    '''Decides whether given argument is installed or local.
+
+    Returns a pair (local, last) where local is the boolean
+    answer and last is the last part of the path (e.g filename).'''
+    local = False
+    if path.startswith('.') or path.startswith('/'):
+        local = True
+    last = path.split('/')[-1]
+    return local, last
 
 def md2tex(md_file, bibliography,
            out_file='bib2md.tex',
@@ -31,8 +46,67 @@ def md2tex(md_file, bibliography,
     run_args = ['pandoc'] + pandoc_options
     subprocess.run(run_args)
 
+def extract_cite_cmds(infile):
+    '''Searches `infile` for TeX cite commands and returns
+    set of triples `(full_cmd, cite type, cite key).`
+    '''
+    content = infile.read()
+    # locate each citation record and store them in a set of tuples:
+    # (full string, cite command, key)
+    p = re.compile(r'(\\([a-z]*cite)\{([^}]+)\})')
+    m = p.findall(content)
+    return set(m)
+
+def generete_tex(cites, build_dir, bibliography,
+                 print_biblio=True, bib_style='md',
+                 template='bib2md.latex',verbose=False):
+    '''Generate texfiles for conversion to md for each cite.
+
+    For each cite in `cites`, generate the corresponding TeX file
+    `build_dir/type.key.tex` that contains the full_cmd of the cite
+    using the specified Pandoc `template`.
+
+    Parameters
+    ==========
+    `bibliography` : list of Strings
+        filenames with bibliography entries to be used
+        in the further processing.
+    `bib_style`: String
+        name of biblatex style
+    '''
+    if build_dir is None:
+        build_dir = '.'
+    # create files for each different citation record
+    for cmd, cite, key in cites:
+        inname = '{}/{}.{}.source.md'.format(build_dir,cite,key)
+        texname = '{}/{}.{}.tex'.format(build_dir,cite,key)
+        result = '{}/{}.{}.md'.format(build_dir,cite,key)
+        with open(inname,'w') as md_f:
+            print(cmd,file=md_f)
+        md2tex(inname,bibliography,
+               out_file=texname,print_biblio=False)
+
+def prepare_build_dir(build_dir, bibliography, bib_style='md',
+                      template='bib2md.latex',
+                      htlatex_cfg='./md.cfg'): ## TODO Update this to install location!
+    '''Copies the necessary files into `build_dir`.'''
+    for b in bibliography:
+        shutil.copy(b, build_dir)
+    if is_local(bib_style)[0]:
+        shutil.copy(bib_style+'.bbx',build_dir)
+        shutil.copy(bib_style+'.cbx',build_dir)
+        if os.path.exists(bib_style+'.dbx'):
+            shutil.copy(bib_style+'.dbx',build_dir)
+    for f in [template, htlatex_cfg]:
+        if is_local(f):
+            shutil.copy(f, build_dir)
+    shutil.copy('Makefile', build_dir)# TODO Generate Makefile using actual names
+
 
 def main():
+    ## TODO: Update arguments (add build_dir, open file directly by argparse)
+    ## TODO: Add htlatex_cfg arg
+    ## TODO: Make some class (and clear funtion arguments after)
     parser = argparse.ArgumentParser(description='''
     Converts Markdown files to `.tex` file with the BIB file
     specified as a bibliography source. The result is intended
@@ -67,9 +141,32 @@ def main():
     bib_style = args.style
     template = args.template
 
-    md2tex(md_file, bibliography, out_file,
-           print_biblio, bib_style, template,
-           args.verbose)
+    tf.tempdir = '.'
+    build_dir_h = tf.TemporaryDirectory(prefix='b2md_')
+    build_dir = build_dir_h.name
+    tf.tempdir = build_dir
+
+    infile = open(md_file,'r')
+    cites = extract_cite_cmds(infile)
+    ## Remove
+    htlatex_cfg = './md.cfg'
+
+    pure_biblio = [is_local(b)[1] for b in bibliography]
+    generete_tex(cites, build_dir,
+                 pure_biblio, bib_style=bib_style,
+                 print_biblio = print_biblio,
+                 template = template)
+    prepare_build_dir(build_dir, bibliography, bib_style,
+                      template, htlatex_cfg)
+
+    ## REMOVE, for testing purpsoses only
+    for _, cite, key in cites:
+        subprocess.run(['make','-C{}'.format(build_dir),'{}.{}.md'.format(cite,key)])
+        shutil.copy('{}/{}.{}.md'.format(build_dir,cite,key),'.')
+
+    #md2tex(md_file, bibliography, out_file,
+    #       print_biblio, bib_style, template,
+    #       args.verbose)
 
 
 if __name__ == "__main__":
