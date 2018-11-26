@@ -6,7 +6,7 @@ import argparse
 def md2tex(md_file, bibliography,
            out_file='bib2md.tex',
            print_biblio=True, bib_style='md',
-           template='template.bib2md',
+           template='bib2md.latex',
            verbose=False):
     pandoc_options = [
       '--to=latex',
