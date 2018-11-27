@@ -1,4 +1,4 @@
-rm *cite.*.*.*.md
+rm -f *cite.*.*.*.md
 python3 bib2md.py -b mypub.bib -s ./md -t ./bib2md.latex test_mdcite.md
 echo
 echo

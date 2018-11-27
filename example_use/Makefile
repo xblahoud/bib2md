@@ -10,7 +10,7 @@ default: all
 
 ### Removes silly link anchor produced by tex4ht for the firs entry
 %.md : %.html
-	pandoc -t markdown $< | sed 's/\[\]{#page.1}\[\]{#X0-}//' > $@
+	pandoc -f html+tex_math_dollars -t markdown $< | sed 's/\[\]{#page.1}\[\]{#X0-}//' > $@
 
 clean_mess:
 	latexmk -CA
