@@ -86,7 +86,8 @@ def generete_tex(cites, build_dir, bibliography,
         md2tex(inname,bibliography,
                out_file=texname,print_biblio=False)
 
-def prepare_build_dir(build_dir, bibliography, bib_style='md',
+def prepare_build_dir(build_dir, bibliography, cites,
+                      bib_style='md',
                       template='bib2md.latex',
                       htlatex_cfg='./md.cfg'): ## TODO Update this to install location!
     '''Copies the necessary files into `build_dir`.'''
@@ -100,7 +101,35 @@ def prepare_build_dir(build_dir, bibliography, bib_style='md',
     for f in [template, htlatex_cfg]:
         if is_local(f):
             shutil.copy(f, build_dir)
-    shutil.copy('Makefile', build_dir)# TODO Generate Makefile using actual names
+
+    ### TODO: Make a function
+    pure_biblio = [is_local(b)[1] for b in bibliography]
+    make_template = '''default: all
+
+%.pdf : %.tex {biblio_str} {bib_style}.*bx
+	xelatex $(patsubst %.pdf,%.tex,$@)
+	biber $(patsubst %.pdf,%,$@)
+	xelatex $(patsubst %.pdf,%.tex,$@)
+
+%.html : %.pdf {htlatex_cfg}
+	htxelatex $(patsubst %.html,%.tex,$@) {htlatex_cfg} " -cunihtf -utf8"
+
+### Removes silly link anchor produced by tex4ht for the firs entry
+%.md : %.html
+	pandoc -f html+tex_math_dollars -t markdown $< | sed 's/\[\]{{#page.1}}\[\]{{#X0-}}//' > $@
+
+clean_mess:
+	latexmk -CA
+	rm -f *.4* *.bbl *.css *.html *.idv *.lg *.run.xml *.tmp *.xref *.xdv
+
+all: {md_files}
+'''
+    makefile = make_template.format(
+        biblio_str=' '.join(pure_biblio),
+        bib_style=is_local(bib_style)[1],
+        htlatex_cfg=is_local(htlatex_cfg)[1],
+        md_files=' '.join(['{}.{}.md'.format(cite,key) for _, cite, key in cites]))
+    print(makefile, file=open('{}/Makefile'.format(build_dir),'w'))
 
 
 def main():
@@ -156,17 +185,13 @@ def main():
                  pure_biblio, bib_style=bib_style,
                  print_biblio = print_biblio,
                  template = template)
-    prepare_build_dir(build_dir, bibliography, bib_style,
+    prepare_build_dir(build_dir, bibliography, cites, bib_style,
                       template, htlatex_cfg)
 
     ## REMOVE, for testing purpsoses only
+    subprocess.run(['make','-C{}'.format(build_dir)])
     for _, cite, key in cites:
-        subprocess.run(['make','-C{}'.format(build_dir),'{}.{}.md'.format(cite,key)])
         shutil.copy('{}/{}.{}.md'.format(build_dir,cite,key),'.')
-
-    #md2tex(md_file, bibliography, out_file,
-    #       print_biblio, bib_style, template,
-    #       args.verbose)
 
 
 if __name__ == "__main__":
