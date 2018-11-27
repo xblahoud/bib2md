@@ -1,6 +1,11 @@
-# Jupyter checkpints
+# Jupyter checkpints & python cache
 .ipynb_checkpoints
+__pycache__
 
 # Intermediate files in example use
 example_use/cite.md
 example_use/full_ref.md
+
+# Intermediate files in test
+test/b2md_*
+test/test_res.md

@@ -84,7 +84,7 @@ class tex2md:
         '''Copies the necessary files into `build_dir`.
 
         copy_infile: boolean (default ``True``)
-            copy also the input file into the build directory
+            also copy the input file into the build directory
         '''
 
         build_dir = self.conv_args['build_dir']
@@ -105,6 +105,7 @@ class tex2md:
                 shutil.copy(f, build_dir)
 
     def convert(self):
+        '''Prepare and execute the conversion.'''
         self.prepare_build_dir()
         self.prepare_make()
         subprocess.run(['make','-C',self.build_dir])
@@ -112,6 +113,12 @@ class tex2md:
                      self.outfile_p)
 
     def prepare_make(self, all_files=None):
+        '''Prepare makefile for current job and store it in `build_dir`
+        
+        all_files: String or list of Strings
+            files we want to generate
+        
+        '''
         build_dir = self.build_dir
 
         if all_files is None:
@@ -238,6 +245,7 @@ def main():
     ## TODO: Update arguments (open file directly by argparse)
     ## TODO: Add htlatex_cfg arg
     ## TODO: Make some class (and clear funtion arguments after)
+    ## TODO: Makefile can be general for all jobs
     parser = argparse.ArgumentParser(description='''
     Converts Markdown files to `.tex` file with the BIB file
     specified as a bibliography source. The result is intended
@@ -283,6 +291,8 @@ def main():
 
     out_file = args.outfile
     bibliography = args.bib
+    
+    # Remove
     print_biblio = args.print
     template = args.template
     
