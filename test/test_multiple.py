@@ -4,7 +4,8 @@ import os
 
 outfiles = ['cite.md','cite2.md','out_cite.md','out_cite2.md']
 for f in outfiles:
-    os.remove(f)
+    if os.path.exists(f):
+        os.remove(f)
 
 c = bib2md.tex2md(['cite.tex','cite2.tex'],'mypub.bib')
 c.prepare_conversion()
@@ -29,5 +30,5 @@ print('''4 files should be created:
 ''')
 
 for f in outfiles:
-    if not os.path.exists:
+    if not os.path.exists(f):
         raise FileNotFoundError(f)

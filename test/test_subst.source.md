@@ -3,7 +3,7 @@ Hello,
 this is a markdown file that uses the `\mdcite` command like this:
 I should read the \mdcite{babiak.15.cav}
 
-What about $2^n$ math? And block?
+What about $`2^n`$ math? And block?
 
 $$
 a^b \times c
