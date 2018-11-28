@@ -8,10 +8,27 @@ import re
 import shutil
 import os
 
+def make_tmp_dir(prefix='b2m_'):
+    tf.tempdir = '.'
+    build_dir_h = tf.TemporaryDirectory(prefix='b2md_')
+    build_dir = build_dir_h.name
+    tf.tempdir = build_dir
+    return build_dir, build_dir_h
+
+def is_local(path):
+    '''Decides whether given argument is installed or local.
+
+    Returns a pair (local, last) where local is the boolean
+    answer and last is the last part of the path (e.g filename).'''
+    local = False
+    if path.startswith('.') or path.startswith('/'):
+        local = True
+    last = path.split('/')[-1]
+    return local, last
+
 class tex2md:
 
-    '''Class that helps us convert TeX files into markdown
-    files while resoving references by biber and biblatex.
+    '''Converts TeX files to markdown using biblatex.
 
     The conversion happens in a temporary directory that is destroyed
     after obtaining the resulting file. If you wish to keep the build
@@ -25,16 +42,18 @@ class tex2md:
 
     Required parameters
     -------------------
-    infile: String filename
-        name of the `.tex` file to be converted
+    infiles: String (filename) or list of filenames
+        name of the `.tex` file(s) to be converted
     bibliography: String or list of Strings
         files with bibliography entries to be used for the conversion
 
     Optional parameters
     -------------------
-    outfile: String filename
-        Name of desired output. If not specified change the extension
-        of `infile` into `md`.
+    outfiles: String (filename) of list of filenames
+        Name(s) of desired output(s).
+        If a list is given, it must match the length of infile list,
+        the i-th infile will be converted into the i-th outfile.
+        If not given, for each infile change the extension to `md`.
     bib_args: dict
         Various configuration filenames that allow to modify the
         conversion. If you use some non-preinstalled files (or styles),
@@ -43,13 +62,18 @@ class tex2md:
             * bib_style  : md     # biblatex style (without extensions)
             * htlatex_cfg : md.cfg # config file for htlatex
             * build_dir  : a random temporary directory
+
     '''
 
-    def __init__(self, infile, bibliography, outfile=None, conv_args=None):
+    def __init__(self, infiles, bibliography, outfiles=None, conv_args=None):
 
-        if not os.path.exists(infile):
-            raise FileNotFoundError('infile: `{}` cannot be found'.format(infile))
-        self.infile = infile
+        if isinstance(infiles,str):
+            infiles = [infiles]
+        for f in infiles:
+            if not os.path.exists(f):
+                raise FileNotFoundError(
+                        'infile: `{}` cannot be found'.format(f))
+        self.infiles = infiles
 
         if isinstance(bibliography,str):
             bibliography = [bibliography]
@@ -57,10 +81,18 @@ class tex2md:
             raise TypeError('Expected list of strings for bibliography')
         self.bibliography = bibliography
 
-        if outfile is None:
-            outfile = os.path.splitext(infile)[0] + '.md'
-        self.outfile_p = outfile
-        self.outfile_n = os.path.split(outfile)[1]
+        if outfiles is None:
+            outfiles = [os.path.splitext(infile)[0] + '.md'
+                        for infile in infiles]
+        if isinstance(outfiles,str):
+            outfiles = [outfiles]
+        self.outfiles_p = outfiles
+        self.outfiles_n = [os.path.split(outfile)[1] for outfile in outfiles]
+
+        if len(infiles) != len(outfiles):
+            raise ValueError('''The number of infiles ({}) does
+                             not match the number of outfiles ({})
+                             '''.format(len(infiles),len(outfiles)))
 
         if conv_args is None:
             conv_args = dict()
@@ -80,19 +112,21 @@ class tex2md:
 
     ## What about infile? I can copy it there but it clashes with the
     ## cites-approach
-    def prepare_build_dir(self, copy_infile=True):
+    def prepare_build_dir(self, copy_infiles=True):
         '''Copies the necessary files into `build_dir`.
 
-        copy_infile: boolean (default ``True``)
-            also copy the input file into the build directory
+        copy_infiles: boolean (default ``True``)
+            also copy the input files into the build directory
         '''
 
         build_dir = self.conv_args['build_dir']
         bib_style = self.conv_args['bib_style']
 
-        if copy_infile:
-            shutil.copy(self.infile, '{}/{}.tex'.format(build_dir,
-                        os.path.splitext(self.outfile_n)[0]))
+        if copy_infiles:
+            for i, infile in enumerate(self.infiles):
+                shutil.copy(infile, '{}/{}.tex'.format(
+                        build_dir,
+                        os.path.splitext(self.outfiles_n[i])[0]))
         for b in self.bibliography:
             shutil.copy(b, build_dir)
         if is_local(bib_style)[0]:
@@ -105,24 +139,26 @@ class tex2md:
                 shutil.copy(f, build_dir)
 
     def convert(self):
-        '''Prepare and execute the conversion.'''
-        self.prepare_build_dir()
-        self.prepare_make()
-        subprocess.run(['make','-C',self.build_dir])
-        shutil.copy('{}/{}'.format(self.build_dir,self.outfile_n),
-                     self.outfile_p)
+        '''Execute the conversion.
 
-    def prepare_make(self, all_files=None):
-        '''Prepare makefile for current job and store it in `build_dir`
-        
-        all_files: String or list of Strings
-            files we want to generate
-        
+        Should be always called after prepare_conversion!
+
         '''
+
+        subprocess.run(['make','-C',self.build_dir])
+        for i, out_n in enumerate(self.outfiles_n):
+            shutil.copy('{}/{}'.format(self.build_dir,out_n),
+                     self.outfiles_p[i])
+
+    def prepare_conversion(self, copy_infiles=True):
+        '''Prepare the conversion.'''
+        self.prepare_build_dir(copy_infiles)
+        self.prepare_make()
+
+    def prepare_make(self):
+        '''Prepare makefile for current job and store it in `build_dir`.'''
         build_dir = self.build_dir
 
-        if all_files is None:
-            all_files = [self.outfile_n]
         ### TODO: Make a function
         pure_biblio = [is_local(b)[1] for b in self.bibliography]
         args = self.conv_args
@@ -150,7 +186,7 @@ all: {md_files}
             biblio_str=' '.join(pure_biblio),
             bib_style=is_local(args['bib_style'])[1],
             htlatex_cfg=is_local(args['htlatex_cfg'])[1],
-            md_files=' '.join(all_files))
+            md_files=' '.join(self.outfiles_n))
         print(makefile, file=open('{}/Makefile'.format(build_dir),'w'))
 
 
@@ -250,7 +286,7 @@ def main():
     Converts Markdown files to `.tex` file with the BIB file
     specified as a bibliography source. The result is intended
     to be used by the bib2md package.
-    
+
     If using a local config files (e.g. for --style, --htlatex-cfg, -t),
     prefix them with `./`.''')
     parser.add_argument('infile',
@@ -291,12 +327,13 @@ def main():
 
     out_file = args.outfile
     bibliography = args.bib
-    
+
     # Remove
     print_biblio = args.print
     template = args.template
-    
+
     convertor = tex2md(args.infile, bibliography,out_file)
+    convertor.prepare_conversion()
     convertor.convert()
 
     #build_dir, bd_h = make_tmp_dir()

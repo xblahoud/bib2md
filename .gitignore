@@ -9,3 +9,5 @@ example_use/full_ref.md
 # Intermediate files in test
 test/b2md_*
 test/test_res.md
+test/cite*.md
+test/out_cite*.md
