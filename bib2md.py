@@ -332,10 +332,11 @@ class cite_replacer():
             inname = '{}/{}.{}.source.md'.format(build_dir,cite,key)
             texname = '{}/{}.{}.tex'.format(build_dir,cite,key)
             with open(inname,'w') as md_f:
-                print(cmd, file=md_f)            
-            md2tex(inname, self.bibliography,
-                   out_file=texname, print_biblio=False)
-        
+                print(cmd, file=md_f)
+            md2tex(inname, [is_local(b)[1] for b in self.bibliography],
+                   out_file=texname, print_biblio=False,
+                   template=self.conv_args['template'],verbose=True)
+
     def convert_cites(self):
         '''Convert the .tex files into .md'''
         self.extract_cite_cmds()
