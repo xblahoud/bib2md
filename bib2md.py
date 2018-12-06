@@ -55,7 +55,7 @@ class tex2md:
         If a list is given, it must match the length of infile list,
         the i-th infile will be converted into the i-th outfile.
         If not given, for each infile change the extension to `md`.
-    bib_args: dict
+    conv_args: dict
         Various configuration filenames that allow to modify the
         conversion. If you use some non-preinstalled files (or styles),
         specify their path and prepend with './' if in the current
@@ -196,10 +196,10 @@ all: {md_files}
 class cite_replacer():
     '''Class that replaces cite commands by their processed md equivalent.
 
-    The class expect a markdown file(s) on input and for each creates 
+    The class expect a markdown file(s) on input and for each creates
     an equivalent markdown file with various TeX `\cite` commands
     replaced by their equivalent processed by biber (BibLaTeX).
-    
+
     The conversion happens in a temporary directory that is destroyed
     after obtaining the resulting file. If you wish to keep the build
     directory, set conv_args.[build_dir] to some existing directory.
@@ -207,7 +207,7 @@ class cite_replacer():
     The class uses the following pipeline:
 
     1. for each cite command create a .tex file with that command excusivelly
-    2. tex2md class converts the files into markdown 
+    2. tex2md class converts the files into markdown
     3. replace all occurences of cite commands with the markdown equivallent
 
     Required parameters
@@ -224,11 +224,11 @@ class cite_replacer():
         If a list is given, it must match the length of infile list,
         the i-th infile will be converted into the i-th outfile.
         If not given, a suffix .bib2md.md as appended to each infile
-    bib_args: dict
+    conv_args: dict
         Various configuration filenames that allow to modify the
-        conversion performed by tex2md class. If you use some 
+        conversion performed by tex2md class. If you use some
         non-preinstalled files (or styles), specify their path and
-        prepend with './' if in the current directory. 
+        prepend with './' if in the current directory.
         The understood keys and defaults are:
             * bib_style   : md           # biblatex style (without extensions)
             * htlatex_cfg : md.cfg       # config file for htlatex
@@ -280,9 +280,9 @@ class cite_replacer():
             conv_args['build_dir'] = bd[0]
         self.build_dir = bd[0]
         self.conv_args = conv_args
-        
+
         self.cites = set()
-        
+
     def extract_cite_cmds(self):
         '''Search all `infiles` for TeX cite commands and
         return set of triples `(full cmd, cite type, cite key).`
@@ -294,7 +294,7 @@ class cite_replacer():
             m = p.findall(content)
             self.cites.update(m)
         return self.cites
-    
+
     def replace_cite_cmds(self):
         '''Search all `infiles` for TeX cite commands and
         return set of triples `(full cmd, cite type, cite key).`
@@ -305,7 +305,7 @@ class cite_replacer():
             with open(cite_file,'r') as c_f:
                 res = c_f.read()
             repl_d[cmd] = res
-            
+
         ## Search for all cmd_commands
         escaped_keys = [re.escape((key)) for key in repl_d.keys()]
         pattern = re.compile('|'.join(escaped_keys))
@@ -317,14 +317,14 @@ class cite_replacer():
             content = pattern.sub(lambda x: repl_d[x.group()],content)
             with open(outfile, 'w') as file:
                 file.write(content)
-    
+
     def generete_tex(self):
         '''Generate texfiles for each unique cite.
 
         For each cite in `cites`, generate the corresponding TeX file
         `build_dir/type.key.tex` that contains the full_cmd of the cite
         using the specified Pandoc `template`.
-        
+
         '''
         build_dir = self.build_dir
         # create files for each different citation record
@@ -346,7 +346,7 @@ class cite_replacer():
         conv.prepare_build_dir(copy_infiles=False)
         conv.prepare_make()
         conv.convert()
-    
+
 def md2tex(md_file, bibliography,
            out_file='bib2md.tex',
            print_biblio=True, bib_style='md',
