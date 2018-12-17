@@ -420,13 +420,13 @@ def main():
     conv_args['bib_style'] = args.style
     conv_args['build_dir'] = args.build_dir
     conv_args['htlatex_cfg'] = args.htlatex_cfg
+    conv_args['template'] = args.template
 
     out_file = args.outfile
     bibliography = args.bib
 
     # Remove
     print_biblio = args.print
-    template = args.template
 
     convertor = tex2md(args.infile, bibliography,out_file)
     convertor.prepare_conversion()
