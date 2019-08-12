@@ -9,6 +9,8 @@ import re
 import shutil
 import os
 
+VERSION=0.2
+
 def make_tmp_dir(prefix='b2m_'):
     tf.tempdir = '.'
     build_dir_h = tf.TemporaryDirectory(prefix='b2md_')
@@ -391,16 +393,16 @@ def main():
                         action='append', required=True,
                         help = '''add .bib file as a bibliography source
                                (required >= 1)''')
-    parser.add_argument('-o', '--output-file',
-                        dest='outfile', default='bib2md.tex',
-                        help='''filename of the .tex output
-                             (default: bib2md.tex)''')
     parser.add_argument('-d', '--build-dir', default=None,
                         help='''A custom directory to be used for building.
                              Use the -o option to control the directory of
                              output.
                              (default: a random directory that will be
                              destroyed after building)''')
+    parser.add_argument('-o', '--output-file',
+                        dest='outfile', default='bib2md.tex',
+                        help='''filename of the .tex output
+                             (default: bib2md.tex)''')
     parser.add_argument('-p', '--print',
                         action='store_true',
                         help='''adds \\printbibliography
@@ -413,8 +415,14 @@ def main():
                         help='pandoc template (default: bib2md)')
     parser.add_argument('-v','--verbose', action='store_true',
                         help='show the pandoc command')
+    parser.add_argument('-V','--version', action='store_true',
+                        help='Print version and exit')
 
     args = parser.parse_args()
+    
+    if args.version:
+        print('bib2md v{}'.format(VERSION))
+        exit(0)
 
     conv_args = dict()
     conv_args['bib_style'] = args.style
